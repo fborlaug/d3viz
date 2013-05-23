@@ -1,0 +1,59 @@
+@(message: String)
+
+@main("Welcome to D3") {
+
+    <script>
+
+        var width = 960,
+        height = 1000,
+        projection = d3.geo.mercator().translate([280, 2350]).scale([1250]),
+        path = d3.geo.path().projection(projection);
+
+        var svg = d3.select("body").append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .call(d3.behavior.zoom()
+        .translate(projection.translate())
+        .scale(projection.scale())
+        .on("zoom", redraw));
+
+
+
+        var axes = svg.append("g").attr("id", "axes"),
+        xAxis = axes.append("line").attr("y2", height),
+        yAxis = axes.append("line").attr("x2", width);
+
+        d3.json("fylker.json", function(error, json) {
+        svg.selectAll("path")
+        .data(json.features)
+        .enter().append("path");
+        redraw();
+        });
+
+        //var bvCoords = projection([10.8423, 59.9231 ]);
+        var bvCoords = projection([5.324722, 60.391111 ]);
+        svg.selectAll("circle")
+        .data([1])
+        .enter()
+        .append("circle")
+        .attr("cx", bvCoords[0]).attr("r", 5).attr("cy", bvCoords[1])
+        .style("fill", "red")
+        .style("opacity", 1);
+
+        function redraw() {
+        if (d3.event) {
+        projection
+        .translate(d3.event.translate)
+        .scale(d3.event.scale);
+        }
+        svg.selectAll("path").attr("d", path);
+        var t = projection.translate();
+        xAxis.attr("x1", t[0]).attr("x2", t[0]);
+        yAxis.attr("y1", t[1]).attr("y2", t[1]);
+        }
+
+
+    </script>
+
+
+}
